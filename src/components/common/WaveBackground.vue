@@ -39,8 +39,8 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   height: 200,
-  wave1Color: '#30A46C',
-  wave2Color: '#22C55E',
-  wave3Color: '#30A46C',
+  wave1Color: '#0EA5E9',
+  wave2Color: '#38BDF8',
+  wave3Color: '#0284C7',
 })
 </script>
