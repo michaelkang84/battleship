@@ -63,3 +63,13 @@ export interface DifficultyConfig {
   description: string
   icon: string
 }
+
+export interface GameRecord {
+  id: string
+  date: number
+  result: 'victory' | 'defeat'
+  difficulty: Difficulty
+  totalMoves: number
+  playerShipsRemaining: number
+  opponentShipsRemaining: number
+}
