@@ -55,6 +55,12 @@
               v-else-if="cell.hasShip && showShips"
               class="h-3/4 w-3/4 rounded-sm bg-primary/70"
             />
+            <span
+              v-else-if="showCoordinates"
+              class="select-none text-[9px] font-medium tracking-tight text-muted-foreground/25"
+            >
+              {{ colLabels[colIndex] }}{{ rowLabels[rowIndex] }}
+            </span>
           </button>
         </template>
       </div>
@@ -75,6 +81,7 @@ interface Props {
   isProcessing?: boolean
   rotation?: number
   compact?: boolean
+  showCoordinates?: boolean
   highlightCells?: { row: number; col: number; valid: boolean }[]
   variant?: 'player' | 'opponent'
 }
@@ -86,6 +93,7 @@ const props = withDefaults(defineProps<Props>(), {
   isProcessing: false,
   rotation: 0,
   compact: false,
+  showCoordinates: false,
   highlightCells: () => [],
   variant: 'player',
 })
