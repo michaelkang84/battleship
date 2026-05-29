@@ -1,10 +1,5 @@
 import type { GameState, Coordinates } from '@/game/types'
-import {
-  createEmptyBoard,
-  placeShipsRandomly,
-  attackCell,
-  areAllShipsSunk,
-} from './board'
+import { createEmptyBoard, placeShipsRandomly, attackCell, areAllShipsSunk } from './board'
 
 export function createNewGame(): GameState {
   const playerBoard = createEmptyBoard()
@@ -43,12 +38,7 @@ export function processPlayerAttack(
     }
   }
 
-  const result = attackCell(
-    gameState.aiBoard,
-    gameState.aiShips,
-    coordinates.row,
-    coordinates.col
-  )
+  const result = attackCell(gameState.aiBoard, gameState.aiShips, coordinates.row, coordinates.col)
 
   if (!result.hit && result.sunk === false && !result.shipType) {
     return {
@@ -88,7 +78,10 @@ export function processPlayerAttack(
   }
 }
 
-export function processAIAttack(gameState: GameState, coordinates: Coordinates): {
+export function processAIAttack(
+  gameState: GameState,
+  coordinates: Coordinates
+): {
   hit: boolean
   sunk: boolean
   gameOver: boolean
