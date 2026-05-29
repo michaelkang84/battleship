@@ -111,7 +111,9 @@ const boardSize = computed(() => props.board[0]?.length || 10)
 
 const titleDotColor = computed(() => (props.variant === 'player' ? 'bg-primary' : 'bg-accent'))
 
-const boardWrapperClass = computed(() => (props.compact ? 'max-w-[320px]' : ''))
+const boardWrapperClass = computed(() =>
+  props.compact ? 'w-full mx-auto max-w-[36rem]' : 'w-full mx-auto max-w-xl'
+)
 
 const boardGridStyle = computed(() => ({
   display: 'grid',

@@ -93,11 +93,6 @@
         </div>
       </div>
 
-      <!-- Phase: Countdown -->
-      <div v-else-if="store.gamePhase === 'countdown'" key="countdown">
-        <CountdownOverlay @complete="handleCountdownComplete" />
-      </div>
-
       <!-- Phase: Battle -->
       <div v-else-if="store.gamePhase === 'battle'" key="battle" class="min-h-screen p-4 md:p-6">
         <div class="mx-auto max-w-7xl">
@@ -195,6 +190,12 @@
         </div>
       </div>
     </Transition>
+
+    <!-- Phase: Countdown (kept outside the phase Transition so its fixed overlay stays viewport-centered) -->
+    <CountdownOverlay
+      v-if="store.gamePhase === 'countdown'"
+      @complete="handleCountdownComplete"
+    />
 
     <!-- Step indicator -->
     <div
