@@ -55,7 +55,7 @@
       </div>
 
       <!-- Phase: Ship Placement -->
-      <div v-else-if="store.gamePhase === 'placement'" key="placement" class="min-h-screen p-6">
+      <div v-else-if="store.gamePhase === 'placement'" key="placement" class="min-h-screen p-6 pb-28">
         <div class="mx-auto max-w-5xl">
           <div class="mb-6 flex items-center justify-between">
             <div>
@@ -94,14 +94,21 @@
       </div>
 
       <!-- Phase: Battle -->
-      <div v-else-if="store.gamePhase === 'battle'" key="battle" class="min-h-screen p-4 md:p-6">
+      <div v-else-if="store.gamePhase === 'battle'" key="battle" class="min-h-screen p-4 pb-28 md:p-6 md:pb-28">
         <div class="mx-auto max-w-7xl">
           <!-- Top bar -->
-          <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h1 class="text-xl font-bold text-foreground">
+          <div class="mb-4 flex flex-wrap items-center gap-3">
+            <h1 class="order-1 text-xl font-bold text-foreground">
               ⚓ <span class="text-gradient">Battle</span>
             </h1>
+            <button
+              class="order-2 ml-auto text-sm text-muted-foreground transition-colors hover:text-foreground lg:order-3"
+              @click="confirmQuit"
+            >
+              Quit Game
+            </button>
             <BoardControls
+              class="order-3 w-full lg:order-2 lg:w-auto"
               :current-view="store.viewMode"
               :rotation="store.boardRotation"
               :is-focused="store.isFocusMode"
@@ -109,12 +116,6 @@
               @rotate="store.rotateBoard()"
               @toggle-focus="store.toggleFocusMode()"
             />
-            <button
-              class="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              @click="confirmQuit"
-            >
-              Quit Game
-            </button>
           </div>
 
           <!-- Game Status -->
@@ -226,11 +227,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import type { Difficulty, ShipType, GamePhase } from '@/game/types'
 import { DIFFICULTY_LEVELS } from '@/constants/game'
 import { useGameStore } from '@/stores/gameStore'
+import { useMediaQuery } from '@/composables/useMediaQuery'
 import Button from '@/components/ui/Button.vue'
 import GameBoard from '@/components/game/GameBoard.vue'
 import ShipPlacement from '@/components/game/ShipPlacement.vue'
@@ -240,6 +242,20 @@ import BoardControls from '@/components/game/BoardControls.vue'
 
 const store = useGameStore()
 const router = useRouter()
+
+// Mobile screens can't fit two boards side-by-side comfortably, so default
+// to a single-board view during battle instead of the stacked split view.
+const isMobile = useMediaQuery('(max-width: 1024px)')
+
+watch(
+  [isMobile, () => store.gamePhase],
+  ([mobile, phase]) => {
+    if (mobile && phase === 'battle' && store.viewMode === 'split') {
+      store.setViewMode('opponent')
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   if (store.gamePhase === 'gameOver') {
