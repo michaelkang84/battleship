@@ -12,6 +12,7 @@ import type {
   GameMove,
   Coordinates,
   ShipSunkNotification,
+  PowerType,
 } from '@/game/types'
 import { BOARD_SIZE, CELL_STATE, SHIP_TYPES } from '@/constants/game'
 import {
@@ -20,6 +21,7 @@ import {
   attackCell,
   areAllShipsSunk,
 } from '@/game/engine/board'
+import { getSonarArea, getAirstrikeArea } from '@/game/engine/powers'
 import { getAIMove, updateAIState, resetAI } from '@/game/ai/aiPlayer'
 import { useHistoryStore } from '@/stores/historyStore'
 
@@ -49,6 +51,18 @@ export const useGameStore = defineStore('game', () => {
   // Ship-sunk notifications (transient toasts)
   const shipSunkNotifications = ref<ShipSunkNotification[]>([])
   let notificationId = 0
+
+  // Special Ordnance (optional per-ship powers, off by default)
+  const specialOrdnanceEnabled = ref(false)
+  const powerUsed = ref<Record<PowerType, boolean>>({
+    sonar: false,
+    airstrike: false,
+    salvo: false,
+  })
+  // Sonar/Airstrike awaiting a target selection on the enemy grid.
+  const activePower = ref<PowerType | null>(null)
+  // Shots left in an armed Salvo (2 -> 1 -> 0).
+  const salvoShotsRemaining = ref(0)
 
   // Ship placement
   const placedShips = ref<Record<string, boolean>>({})
@@ -170,8 +184,109 @@ export const useGameStore = defineStore('game', () => {
     currentTurn.value = 'player'
     moveHistory.value = []
     shipSunkNotifications.value = []
+    resetPowers()
     message.value = ''
     resetAI()
+  }
+
+  function setSpecialOrdnance(enabled: boolean) {
+    specialOrdnanceEnabled.value = enabled
+  }
+
+  function resetPowers() {
+    powerUsed.value = { sonar: false, airstrike: false, salvo: false }
+    activePower.value = null
+    salvoShotsRemaining.value = 0
+  }
+
+  // Select a power: arm Salvo immediately, or toggle targeting for Sonar/Airstrike.
+  function selectPower(power: PowerType) {
+    if (!specialOrdnanceEnabled.value) return
+    if (isProcessing.value || currentTurn.value !== 'player' || gamePhase.value !== 'battle') return
+    if (powerUsed.value[power] || salvoShotsRemaining.value > 0) return
+
+    if (power === 'salvo') {
+      powerUsed.value = { ...powerUsed.value, salvo: true }
+      salvoShotsRemaining.value = 2
+      activePower.value = null
+      message.value = 'Salvo armed — fire 2 shots! 🎯'
+      return
+    }
+
+    activePower.value = activePower.value === power ? null : power
+    if (activePower.value === 'sonar') {
+      message.value = 'Sonar ready — select a 3×3 sector to scan 📡'
+    } else if (activePower.value === 'airstrike') {
+      message.value = 'Airstrike ready — select a 1×3 line to recon ✈️'
+    }
+  }
+
+  function cancelPower() {
+    activePower.value = null
+  }
+
+  async function useSonar(anchor: Coordinates): Promise<void> {
+    if (activePower.value !== 'sonar') return
+    if (isProcessing.value || currentTurn.value !== 'player' || gamePhase.value !== 'battle') return
+
+    isProcessing.value = true
+    activePower.value = null
+    powerUsed.value = { ...powerUsed.value, sonar: true }
+
+    const area = getSonarArea(anchor)
+    const contact = area.some(({ row, col }) => {
+      const cell = opponentBoard.value[row][col]
+      return cell.hasShip && cell.state !== CELL_STATE.HIT
+    })
+
+    // Persist area intel on undiscovered cells (don't override exact intel or fired cells).
+    for (const { row, col } of area) {
+      const cell = opponentBoard.value[row][col]
+      if (cell.state === CELL_STATE.EMPTY && cell.intel !== 'ship' && cell.intel !== 'empty') {
+        cell.intel = contact ? 'contact' : 'clear'
+      }
+    }
+
+    message.value = contact
+      ? 'Sonar: contact detected in the sector! 📡'
+      : 'Sonar: sector clear — no ships. 🌊'
+
+    currentTurn.value = 'opponent'
+    await new Promise(resolve => setTimeout(resolve, 700))
+    await executeAITurn()
+    isProcessing.value = false
+  }
+
+  async function useAirstrike(anchor: Coordinates): Promise<void> {
+    if (activePower.value !== 'airstrike') return
+    if (isProcessing.value || currentTurn.value !== 'player' || gamePhase.value !== 'battle') return
+
+    isProcessing.value = true
+    activePower.value = null
+    powerUsed.value = { ...powerUsed.value, airstrike: true }
+
+    const area = getAirstrikeArea(anchor)
+    let shipsFound = 0
+    for (const { row, col } of area) {
+      const cell = opponentBoard.value[row][col]
+      if (cell.state !== CELL_STATE.EMPTY) continue
+      if (cell.hasShip) {
+        cell.intel = 'ship'
+        shipsFound++
+      } else {
+        cell.intel = 'empty'
+      }
+    }
+
+    message.value =
+      shipsFound > 0
+        ? `Airstrike recon: ${shipsFound} ship cell${shipsFound > 1 ? 's' : ''} located! ✈️`
+        : 'Airstrike recon: nothing in that line. ✈️'
+
+    currentTurn.value = 'opponent'
+    await new Promise(resolve => setTimeout(resolve, 700))
+    await executeAITurn()
+    isProcessing.value = false
   }
 
   function notifyShipSunk(by: 'player' | 'opponent', shipType: string) {
@@ -184,6 +299,8 @@ export const useGameStore = defineStore('game', () => {
 
   async function playerAttack(coordinates: Coordinates): Promise<void> {
     if (isProcessing.value || currentTurn.value !== 'player' || gamePhase.value !== 'battle') return
+    // Sonar/Airstrike targeting routes board clicks elsewhere.
+    if (activePower.value !== null) return
 
     const cell = opponentBoard.value[coordinates.row][coordinates.col]
     if (cell.state === CELL_STATE.HIT || cell.state === CELL_STATE.MISS) return
@@ -223,6 +340,16 @@ export const useGameStore = defineStore('game', () => {
       recordGameResult('victory')
       isProcessing.value = false
       return
+    }
+
+    // Salvo: take a second shot before the opponent responds.
+    if (salvoShotsRemaining.value > 0) {
+      salvoShotsRemaining.value -= 1
+      if (salvoShotsRemaining.value > 0) {
+        message.value += ' · Salvo: 1 shot left 🎯'
+        isProcessing.value = false
+        return
+      }
     }
 
     currentTurn.value = 'opponent'
@@ -297,6 +424,8 @@ export const useGameStore = defineStore('game', () => {
     opponentShips.value = []
     moveHistory.value = []
     shipSunkNotifications.value = []
+    specialOrdnanceEnabled.value = false
+    resetPowers()
     placedShips.value = {}
     placementOrientation.value = 'horizontal'
     currentTurn.value = 'player'
@@ -321,6 +450,10 @@ export const useGameStore = defineStore('game', () => {
     placementOrientation,
     currentTurn,
     shipSunkNotifications,
+    specialOrdnanceEnabled,
+    powerUsed,
+    activePower,
+    salvoShotsRemaining,
     // Computed
     turnCount,
     playerShipsRemaining,
@@ -342,5 +475,10 @@ export const useGameStore = defineStore('game', () => {
     playerAttack,
     resetGame,
     dismissShipSunkNotification,
+    setSpecialOrdnance,
+    selectPower,
+    cancelPower,
+    useSonar,
+    useAirstrike,
   }
 })

@@ -46,6 +46,37 @@
             </button>
           </div>
 
+          <div class="animate-slide-up mt-6" style="animation-delay: 0.22s; opacity: 0">
+            <button
+              type="button"
+              class="mx-auto flex w-full max-w-md items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all duration-300"
+              :class="
+                store.specialOrdnanceEnabled
+                  ? 'border-primary bg-primary/10 shadow-glow'
+                  : 'border-border/30 bg-card/50 hover:border-primary/30 hover:bg-card/80'
+              "
+              @click="store.setSpecialOrdnance(!store.specialOrdnanceEnabled)"
+            >
+              <span class="text-2xl">🛠️</span>
+              <span class="flex-1">
+                <span class="block text-sm font-bold">Special Ordnance</span>
+                <span class="block text-xs text-muted-foreground">
+                  Each ship grants a one-time power — Sonar Ping, Airstrike Recon &amp; Salvo. Off
+                  keeps classic rules.
+                </span>
+              </span>
+              <span
+                class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors"
+                :class="store.specialOrdnanceEnabled ? 'bg-primary' : 'bg-muted-foreground/30'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  :class="store.specialOrdnanceEnabled ? 'translate-x-4' : 'translate-x-0.5'"
+                />
+              </span>
+            </button>
+          </div>
+
           <div class="animate-slide-up mt-8 text-center" style="animation-delay: 0.3s; opacity: 0">
             <Button size="lg" @click="store.setPhase('placement')">
               Continue to Ship Placement →
@@ -140,6 +171,11 @@
             />
           </div>
 
+          <!-- Special Ordnance action bar -->
+          <div v-if="store.specialOrdnanceEnabled" class="mb-4">
+            <SpecialOrdnanceBar />
+          </div>
+
           <!-- Boards -->
           <div
             class="relative grid gap-6 transition-all duration-500 ease-in-out"
@@ -169,8 +205,11 @@
                   :is-processing="store.isProcessing"
                   :rotation="store.boardRotation"
                   :compact="store.viewMode === 'split'"
+                  :highlight-cells="targetingHighlight"
                   variant="opponent"
                   @cell-click="handleAttack"
+                  @cell-hover="handleOpponentHover"
+                  @cell-leave="handleOpponentLeave"
                 />
               </div>
             </Transition>
@@ -243,7 +282,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import type { Difficulty, ShipType, GamePhase } from '@/game/types'
 import { DIFFICULTY_LEVELS } from '@/constants/game'
@@ -256,6 +295,8 @@ import CountdownOverlay from '@/components/game/CountdownOverlay.vue'
 import GameStatus from '@/components/game/GameStatus.vue'
 import BoardControls from '@/components/game/BoardControls.vue'
 import ShipSunkToasts from '@/components/game/ShipSunkToasts.vue'
+import SpecialOrdnanceBar from '@/components/game/SpecialOrdnanceBar.vue'
+import { getSonarArea, getAirstrikeArea } from '@/game/engine/powers'
 
 const store = useGameStore()
 const router = useRouter()
@@ -326,8 +367,34 @@ function handleCountdownComplete() {
 }
 
 function handleAttack(row: number, col: number) {
-  store.playerAttack({ row, col })
+  if (store.activePower === 'sonar') {
+    store.useSonar({ row, col })
+  } else if (store.activePower === 'airstrike') {
+    store.useAirstrike({ row, col })
+  } else {
+    store.playerAttack({ row, col })
+  }
 }
+
+const hoveredCell = ref<{ row: number; col: number } | null>(null)
+
+function handleOpponentHover(row: number, col: number) {
+  hoveredCell.value = { row, col }
+}
+
+function handleOpponentLeave() {
+  hoveredCell.value = null
+}
+
+// Preview the area a Sonar/Airstrike will cover while aiming.
+const targetingHighlight = computed(() => {
+  if (!store.activePower || store.activePower === 'salvo' || !hoveredCell.value) return []
+  const area =
+    store.activePower === 'sonar'
+      ? getSonarArea(hoveredCell.value)
+      : getAirstrikeArea(hoveredCell.value)
+  return area.map(c => ({ row: c.row, col: c.col, valid: true }))
+})
 
 function confirmQuit() {
   if (window.confirm('Are you sure you want to quit the current game?')) {

@@ -14,6 +14,13 @@ export type StatusMode = 'default' | 'detailed' | 'minimized'
 
 export type Orientation = 'horizontal' | 'vertical'
 
+export type PowerType = 'sonar' | 'airstrike' | 'salvo'
+
+// Intel revealed on enemy cells by Special Ordnance powers.
+// 'contact'/'clear' come from a Sonar Ping area scan (no exact location),
+// 'ship'/'empty' come from an Airstrike Recon line scan (exact).
+export type CellIntel = 'contact' | 'clear' | 'ship' | 'empty'
+
 export interface Coordinates {
   row: number
   col: number
@@ -31,6 +38,7 @@ export interface Cell {
   state: CellState
   hasShip: boolean
   shipId?: string
+  intel?: CellIntel
 }
 
 export type Board = Cell[][]
@@ -68,6 +76,14 @@ export interface DifficultyConfig {
   name: string
   description: string
   icon: string
+}
+
+export interface PowerConfig {
+  id: PowerType
+  ship: ShipType
+  name: string
+  icon: string
+  description: string
 }
 
 export interface GameRecord {

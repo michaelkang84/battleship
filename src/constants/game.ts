@@ -1,4 +1,4 @@
-import type { DifficultyConfig } from '@/game/types'
+import type { DifficultyConfig, PowerConfig, PowerType } from '@/game/types'
 
 export const BOARD_SIZE = 10
 
@@ -32,6 +32,32 @@ export const DIFFICULTY_LEVELS: Record<string, DifficultyConfig> = {
     name: 'Hard',
     description: 'AI uses advanced targeting strategy.',
     icon: '🔥',
+  },
+}
+
+// Special Ordnance: optional, off-by-default per-ship powers. Each can be used
+// once per game and keeps classic Battleship rules intact ("a hit is still a hit").
+export const SPECIAL_POWERS: Record<PowerType, PowerConfig> = {
+  sonar: {
+    id: 'sonar',
+    ship: 'SUBMARINE',
+    name: 'Sonar Ping',
+    icon: '📡',
+    description: 'Scan a 3×3 sector for any enemy ship (no exact location). Uses your turn.',
+  },
+  airstrike: {
+    id: 'airstrike',
+    ship: 'CARRIER',
+    name: 'Airstrike Recon',
+    icon: '✈️',
+    description: 'Reveal ship / empty for a 1×3 line. Intel only — no damage. Uses your turn.',
+  },
+  salvo: {
+    id: 'salvo',
+    ship: 'BATTLESHIP',
+    name: 'Salvo',
+    icon: '🎯',
+    description: 'Fire two shots in a single turn.',
   },
 }
 

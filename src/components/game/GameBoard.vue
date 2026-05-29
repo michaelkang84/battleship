@@ -73,6 +73,13 @@
               v-else-if="cell.hasShip && showShips"
               class="h-3/4 w-3/4 rounded-sm bg-primary/70"
             />
+            <span v-else-if="cell.intel === 'ship'" class="text-sm text-amber-400">◎</span>
+            <span v-else-if="cell.intel === 'empty'" class="text-[11px] text-muted-foreground/40"
+              >◌</span
+            >
+            <span v-else-if="cell.intel === 'contact'" class="text-[10px] text-emerald-400/70"
+              >◦</span
+            >
             <span
               v-else-if="showCoordinates"
               class="select-none text-[9px] font-medium tracking-tight text-muted-foreground/25"
@@ -160,6 +167,14 @@ function getCellClass(cell: Cell, row: number, col: number): string {
     )
   } else if (cell.hasShip && props.showShips) {
     classes.push('bg-primary/15 border-primary/30')
+  } else if (cell.intel === 'ship') {
+    classes.push('bg-amber-500/20 border-amber-500/40')
+  } else if (cell.intel === 'empty') {
+    classes.push('bg-muted/40 border-border/40')
+  } else if (cell.intel === 'contact') {
+    classes.push('bg-emerald-500/15 border-emerald-500/30')
+  } else if (cell.intel === 'clear') {
+    classes.push('bg-slate-500/10 border-slate-500/20')
   } else {
     classes.push('bg-muted/30 hover:bg-muted/60')
   }
