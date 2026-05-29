@@ -190,9 +190,7 @@
           <p class="mb-8 text-sm text-muted-foreground">Game lasted {{ store.turnCount }} turns</p>
           <div class="flex justify-center gap-4">
             <Button size="lg" @click="store.resetGame()"> Play Again </Button>
-            <RouterLink to="/">
-              <Button variant="outline" size="lg"> Home </Button>
-            </RouterLink>
+            <Button variant="outline" size="lg" @click="goHome"> Home </Button>
           </div>
         </div>
       </div>
@@ -227,8 +225,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import type { Difficulty, ShipType, GamePhase } from '@/game/types'
 import { DIFFICULTY_LEVELS } from '@/constants/game'
 import { useGameStore } from '@/stores/gameStore'
@@ -240,6 +238,13 @@ import GameStatus from '@/components/game/GameStatus.vue'
 import BoardControls from '@/components/game/BoardControls.vue'
 
 const store = useGameStore()
+const router = useRouter()
+
+onMounted(() => {
+  if (store.gamePhase === 'gameOver') {
+    store.resetGame()
+  }
+})
 
 const steps = [
   { key: 'options' as GamePhase, label: 'Options' },
@@ -294,6 +299,11 @@ function confirmQuit() {
   if (window.confirm('Are you sure you want to quit the current game?')) {
     store.resetGame()
   }
+}
+
+function goHome() {
+  store.resetGame()
+  router.push('/')
 }
 </script>
 
