@@ -20,6 +20,7 @@ import {
   areAllShipsSunk,
 } from '@/game/engine/board'
 import { getAIMove, updateAIState, resetAI } from '@/game/ai/aiPlayer'
+import { useHistoryStore } from '@/stores/historyStore'
 
 export const useGameStore = defineStore('game', () => {
   // Game phase
@@ -201,6 +202,7 @@ export const useGameStore = defineStore('game', () => {
     if (areAllShipsSunk(opponentShips.value)) {
       gamePhase.value = 'gameOver'
       message.value = '🎉 Victory! You sunk the entire enemy fleet!'
+      recordGameResult('victory')
       isProcessing.value = false
       return
     }
@@ -241,10 +243,22 @@ export const useGameStore = defineStore('game', () => {
     if (areAllShipsSunk(playerShips.value)) {
       gamePhase.value = 'gameOver'
       message.value = '💀 Defeat! Your fleet has been destroyed!'
+      recordGameResult('defeat')
       return
     }
 
     currentTurn.value = 'player'
+  }
+
+  function recordGameResult(result: 'victory' | 'defeat') {
+    const historyStore = useHistoryStore()
+    historyStore.addRecord({
+      result,
+      difficulty: difficulty.value,
+      totalMoves: moveHistory.value.length,
+      playerShipsRemaining: playerShips.value.filter(s => !s.isSunk).length,
+      opponentShipsRemaining: opponentShips.value.filter(s => !s.isSunk).length,
+    })
   }
 
   function resetGame() {

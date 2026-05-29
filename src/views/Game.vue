@@ -133,7 +133,10 @@
           </div>
 
           <!-- Boards -->
-          <div class="relative grid gap-6 transition-all duration-500 ease-in-out" :class="boardGridClass">
+          <div
+            class="relative grid gap-6 transition-all duration-500 ease-in-out"
+            :class="boardGridClass"
+          >
             <!-- Player Board -->
             <Transition name="board">
               <div v-if="showPlayerBoard" key="player-board">
@@ -188,15 +191,17 @@
             <Button size="lg" @click="store.resetGame()"> Play Again </Button>
             <Button variant="outline" size="lg" @click="goHome"> Home </Button>
           </div>
+          <RouterLink to="/history" class="mt-4 inline-block">
+            <Button variant="ghost" size="sm" class="text-muted-foreground">
+              View Game History
+            </Button>
+          </RouterLink>
         </div>
       </div>
     </Transition>
 
     <!-- Phase: Countdown (kept outside the phase Transition so its fixed overlay stays viewport-centered) -->
-    <CountdownOverlay
-      v-if="store.gamePhase === 'countdown'"
-      @complete="handleCountdownComplete"
-    />
+    <CountdownOverlay v-if="store.gamePhase === 'countdown'" @complete="handleCountdownComplete" />
 
     <!-- Step indicator -->
     <div

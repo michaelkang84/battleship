@@ -44,16 +44,29 @@
           </Button>
         </RouterLink>
 
-        <RouterLink to="/instructions">
-          <Button
-            variant="outline"
-            size="lg"
-            class="animate-slide-up"
-            style="animation-delay: 1.15s; opacity: 0"
-          >
-            How to Play
-          </Button>
-        </RouterLink>
+        <div class="flex gap-3">
+          <RouterLink to="/instructions">
+            <Button
+              variant="outline"
+              size="lg"
+              class="animate-slide-up"
+              style="animation-delay: 1.15s; opacity: 0"
+            >
+              How to Play
+            </Button>
+          </RouterLink>
+
+          <RouterLink to="/history">
+            <Button
+              variant="ghost"
+              size="lg"
+              class="animate-slide-up"
+              style="animation-delay: 1.25s; opacity: 0"
+            >
+              Game History
+            </Button>
+          </RouterLink>
+        </div>
       </div>
 
       <!-- Ship display -->
