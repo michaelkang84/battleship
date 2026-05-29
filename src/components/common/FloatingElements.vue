@@ -70,14 +70,24 @@ const bubbles: BubbleConfig[] = Array.from({ length: props.bubbleCount }, (_, i)
   delay: Math.random() * 5,
 }))
 
+const archIconCount = 11
+const archCenterX = 50
+const archRadiusX = 34
+const archCenterY = 34
+const archRadiusY = 16
+
 const floatingIcons: FloatingIcon[] = props.showIcons
-  ? Array.from({ length: 5 }, (_, i) => ({
-      id: i + 100,
-      x: 10 + i * 20,
-      y: 15 + Math.random() * 60,
-      icon: icons[i % icons.length],
-      duration: 4 + Math.random() * 4,
-      delay: Math.random() * 3,
-    }))
+  ? Array.from({ length: archIconCount }, (_, i) => {
+      const t = i / (archIconCount - 1)
+      const angle = Math.PI * (1 - t)
+      return {
+        id: i + 100,
+        x: archCenterX + archRadiusX * Math.cos(angle),
+        y: archCenterY - archRadiusY * Math.sin(angle),
+        icon: icons[i % icons.length],
+        duration: 4 + Math.random() * 4,
+        delay: Math.random() * 3,
+      }
+    })
   : []
 </script>
