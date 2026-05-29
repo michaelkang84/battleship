@@ -4,6 +4,16 @@ export type CellState = (typeof CELL_STATE)[keyof typeof CELL_STATE]
 
 export type ShipType = keyof typeof SHIP_TYPES
 
+export type Difficulty = 'easy' | 'medium' | 'hard'
+
+export type GamePhase = 'options' | 'placement' | 'countdown' | 'battle' | 'gameOver'
+
+export type ViewMode = 'split' | 'player' | 'opponent'
+
+export type StatusMode = 'default' | 'detailed' | 'minimized'
+
+export type Orientation = 'horizontal' | 'vertical'
+
 export interface Coordinates {
   row: number
   col: number
@@ -37,4 +47,19 @@ export interface GameState {
   aiShips: Ship[]
   currentTurn: 'player' | 'ai'
   gameStatus: 'setup' | 'playing' | 'won' | 'lost'
+}
+
+export interface GameMove {
+  player: 'player' | 'opponent'
+  coordinates: Coordinates
+  result: 'hit' | 'miss'
+  shipType?: string
+  sunk: boolean
+  timestamp: number
+}
+
+export interface DifficultyConfig {
+  name: string
+  description: string
+  icon: string
 }
