@@ -12,6 +12,24 @@
       class="board-grid-wrapper relative rounded-xl border border-border/50 bg-card/50 p-2 shadow-sm transition-transform duration-500"
       :style="{ transform: `rotate(${rotation}deg)` }"
     >
+      <!-- Loading overlay while the AI is making its move -->
+      <Transition name="processing-fade">
+        <div
+          v-if="isProcessing"
+          class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-foreground/10 backdrop-blur-[1px]"
+          :style="{ transform: `rotate(-${rotation}deg)` }"
+        >
+          <div
+            class="flex items-center gap-2 rounded-full border border-border/40 bg-card/90 px-4 py-2 shadow-sm"
+          >
+            <span
+              class="h-3 w-3 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground/80"
+            />
+            <span class="text-xs font-medium text-muted-foreground">Opponent is thinking…</span>
+          </div>
+        </div>
+      </Transition>
+
       <!-- Full board grid (labels + cells) -->
       <div class="board-grid" :style="boardGridStyle">
         <!-- Top-left corner spacer -->
@@ -188,5 +206,15 @@ function handleCellLeave(): void {
 .board-cell {
   min-width: 0;
   min-height: 0;
+}
+
+.processing-fade-enter-active,
+.processing-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.processing-fade-enter-from,
+.processing-fade-leave-to {
+  opacity: 0;
 }
 </style>

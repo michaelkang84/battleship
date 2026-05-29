@@ -132,7 +132,7 @@
           </div>
 
           <!-- Boards -->
-          <div class="grid gap-6 transition-all duration-500" :class="boardGridClass">
+          <div class="relative grid gap-6 transition-all duration-500 ease-in-out" :class="boardGridClass">
             <!-- Player Board -->
             <Transition name="board">
               <div v-if="showPlayerBoard" key="player-board">
@@ -328,20 +328,29 @@ function goHome() {
 }
 
 .board-enter-active {
-  transition: all 0.4s ease-out;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+  transition-delay: 0.1s;
 }
 
 .board-leave-active {
-  transition: all 0.2s ease-in;
+  /* Take the leaving board out of the grid flow so the remaining
+     board can resize/recenter without a layout jump. */
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .board-enter-from {
   opacity: 0;
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .board-leave-to {
   opacity: 0;
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 </style>
