@@ -55,7 +55,11 @@
       </div>
 
       <!-- Phase: Ship Placement -->
-      <div v-else-if="store.gamePhase === 'placement'" key="placement" class="min-h-screen p-6 pb-28">
+      <div
+        v-else-if="store.gamePhase === 'placement'"
+        key="placement"
+        class="min-h-screen p-6 pb-28"
+      >
         <div class="mx-auto max-w-5xl">
           <div class="mb-6 flex items-center justify-between">
             <div>
@@ -94,7 +98,11 @@
       </div>
 
       <!-- Phase: Battle -->
-      <div v-else-if="store.gamePhase === 'battle'" key="battle" class="min-h-screen p-4 pb-28 md:p-6 md:pb-28">
+      <div
+        v-else-if="store.gamePhase === 'battle'"
+        key="battle"
+        class="min-h-screen p-4 pb-28 md:p-6 md:pb-28"
+      >
         <div class="mx-auto max-w-7xl">
           <!-- Top bar -->
           <div class="mb-4 flex flex-wrap items-center gap-3">
@@ -203,6 +211,9 @@
     <!-- Phase: Countdown (kept outside the phase Transition so its fixed overlay stays viewport-centered) -->
     <CountdownOverlay v-if="store.gamePhase === 'countdown'" @complete="handleCountdownComplete" />
 
+    <!-- Ship-sunk notifications -->
+    <ShipSunkToasts />
+
     <!-- Step indicator -->
     <div
       v-if="store.gamePhase !== 'countdown' && store.gamePhase !== 'gameOver'"
@@ -244,6 +255,7 @@ import ShipPlacement from '@/components/game/ShipPlacement.vue'
 import CountdownOverlay from '@/components/game/CountdownOverlay.vue'
 import GameStatus from '@/components/game/GameStatus.vue'
 import BoardControls from '@/components/game/BoardControls.vue'
+import ShipSunkToasts from '@/components/game/ShipSunkToasts.vue'
 
 const store = useGameStore()
 const router = useRouter()

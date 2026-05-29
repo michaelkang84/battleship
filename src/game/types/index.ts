@@ -58,6 +58,12 @@ export interface GameMove {
   timestamp: number
 }
 
+export interface ShipSunkNotification {
+  id: number
+  by: 'player' | 'opponent'
+  shipType: string
+}
+
 export interface DifficultyConfig {
   name: string
   description: string
