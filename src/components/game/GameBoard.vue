@@ -9,12 +9,14 @@
     </h3>
 
     <div
-      class="relative overflow-hidden rounded-xl border border-border/50 bg-card/50 p-2 shadow-sm transition-transform duration-500"
+      class="board-grid-wrapper relative rounded-xl border border-border/50 bg-card/50 p-2 shadow-sm transition-transform duration-500"
       :style="{ transform: `rotate(${rotation}deg)` }"
     >
-      <!-- Column labels -->
-      <div class="mb-1 grid gap-[2px]" :style="gridColumnsWithLabel">
-        <div class="w-7" />
+      <!-- Full board grid (labels + cells) -->
+      <div class="board-grid" :style="boardGridStyle">
+        <!-- Top-left corner spacer -->
+        <div />
+        <!-- Column labels -->
         <div
           v-for="col in colLabels"
           :key="'col-' + col"
@@ -23,39 +25,38 @@
         >
           {{ col }}
         </div>
-      </div>
 
-      <!-- Board rows -->
-      <div v-for="(row, rowIndex) in board" :key="'row-' + rowIndex" class="flex gap-[2px]">
-        <!-- Row label -->
-        <div
-          class="flex w-7 items-center justify-center text-[10px] font-bold text-muted-foreground/70"
-          :style="{ transform: `rotate(-${rotation}deg)` }"
-        >
-          {{ rowLabels[rowIndex] }}
-        </div>
-
-        <!-- Cells -->
-        <button
-          v-for="(cell, colIndex) in row"
-          :key="'cell-' + rowIndex + '-' + colIndex"
-          :class="getCellClass(cell, rowIndex, colIndex)"
-          :disabled="!isClickable || isProcessing"
-          class="board-cell flex items-center justify-center text-xs font-bold"
-          :style="cellSizeStyle"
-          @click="handleCellClick(rowIndex, colIndex)"
-          @mouseenter="handleCellHover(rowIndex, colIndex)"
-          @mouseleave="handleCellLeave"
-        >
-          <span v-if="cell.state === 'hit'" class="animate-cell-hit">💥</span>
-          <span v-else-if="cell.state === 'miss'" class="animate-cell-miss text-blue-400/60"
-            >•</span
+        <!-- Board rows -->
+        <template v-for="(row, rowIndex) in board" :key="'row-' + rowIndex">
+          <!-- Row label -->
+          <div
+            class="flex items-center justify-center text-[10px] font-bold text-muted-foreground/70"
+            :style="{ transform: `rotate(-${rotation}deg)` }"
           >
-          <span
-            v-else-if="cell.hasShip && showShips"
-            class="h-3/4 w-3/4 rounded-sm bg-primary/70"
-          />
-        </button>
+            {{ rowLabels[rowIndex] }}
+          </div>
+
+          <!-- Cells -->
+          <button
+            v-for="(cell, colIndex) in row"
+            :key="'cell-' + rowIndex + '-' + colIndex"
+            :class="getCellClass(cell, rowIndex, colIndex)"
+            :disabled="!isClickable || isProcessing"
+            class="board-cell flex aspect-square items-center justify-center text-xs font-bold"
+            @click="handleCellClick(rowIndex, colIndex)"
+            @mouseenter="handleCellHover(rowIndex, colIndex)"
+            @mouseleave="handleCellLeave"
+          >
+            <span v-if="cell.state === 'hit'" class="animate-cell-hit">💥</span>
+            <span v-else-if="cell.state === 'miss'" class="animate-cell-miss text-blue-400/60"
+              >•</span
+            >
+            <span
+              v-else-if="cell.hasShip && showShips"
+              class="h-3/4 w-3/4 rounded-sm bg-primary/70"
+            />
+          </button>
+        </template>
       </div>
     </div>
   </div>
@@ -104,13 +105,10 @@ const titleDotColor = computed(() => (props.variant === 'player' ? 'bg-primary' 
 
 const boardWrapperClass = computed(() => (props.compact ? 'max-w-[320px]' : ''))
 
-const cellSizeStyle = computed(() => ({
-  width: props.compact ? '28px' : '36px',
-  height: props.compact ? '28px' : '36px',
-}))
-
-const gridColumnsWithLabel = computed(() => ({
+const boardGridStyle = computed(() => ({
+  display: 'grid',
   gridTemplateColumns: `1.75rem repeat(${boardSize.value}, 1fr)`,
+  gap: '2px',
 }))
 
 function isHighlighted(row: number, col: number): { highlighted: boolean; valid: boolean } {
@@ -170,5 +168,15 @@ function handleCellLeave(): void {
 <style scoped>
 .game-board {
   @apply flex flex-col;
+}
+
+.board-grid-wrapper {
+  overflow: visible;
+  min-width: 0;
+}
+
+.board-cell {
+  min-width: 0;
+  min-height: 0;
 }
 </style>
