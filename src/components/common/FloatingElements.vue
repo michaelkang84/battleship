@@ -58,7 +58,7 @@ const props = withDefaults(defineProps<Props>(), {
   showIcons: true,
 })
 
-const colors = ['#6366f1', '#2dd4bf', '#f97316', '#3b82f6', '#a855f7']
+const colors = ['#30A46C', '#22C55E', '#6B7280', '#059669', '#34D399']
 const icons = ['⚓', '🚢', '🌊', '⭐', '🐚', '🐠', '🧭']
 
 const bubbles: BubbleConfig[] = Array.from({ length: props.bubbleCount }, (_, i) => ({

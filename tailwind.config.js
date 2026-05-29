@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
@@ -41,27 +41,22 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        ocean: {
-          50: '#e6f7ff',
-          100: '#b3e6ff',
-          200: '#80d4ff',
-          300: '#4dc3ff',
-          400: '#26b5ff',
-          500: '#00a3ff',
-          600: '#0082cc',
-          700: '#006299',
-          800: '#004166',
-          900: '#002133',
+        green: {
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
         },
-        coral: {
-          DEFAULT: '#FF6B6B',
-          light: '#FF8E8E',
-          dark: '#E85555',
-        },
-        teal: {
-          DEFAULT: '#2DD4BF',
-          light: '#5EEAD4',
-          dark: '#14B8A6',
+        slate: {
+          DEFAULT: '#6B7280',
+          light: '#9CA3AF',
+          dark: '#4B5563',
         },
       },
       borderRadius: {
@@ -106,10 +101,10 @@ export default {
         },
         'pulse-glow': {
           '0%, 100%': {
-            boxShadow: '0 0 5px rgba(99, 102, 241, 0.3)',
+            boxShadow: '0 0 5px rgba(48, 164, 108, 0.3)',
           },
           '50%': {
-            boxShadow: '0 0 25px rgba(99, 102, 241, 0.6)',
+            boxShadow: '0 0 25px rgba(48, 164, 108, 0.6)',
           },
         },
         'countdown-pop': {
