@@ -75,6 +75,11 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function setViewMode(mode: ViewMode) {
+    // If we're in focus mode and switching to a different view, exit focus
+    // mode first by restoring the status panel.
+    if (isFocusMode.value && mode !== viewMode.value) {
+      statusMode.value = 'default'
+    }
     viewMode.value = mode
   }
 
