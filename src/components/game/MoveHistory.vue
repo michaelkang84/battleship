@@ -5,7 +5,7 @@
       :key="index"
       class="flex items-center gap-2 border-b border-border/20 px-2 py-1.5 text-xs last:border-0"
     >
-      <span class="font-mono text-muted-foreground">{{ formatTime(move.timestamp) }}</span>
+      <span class="font-mono text-muted-foreground">{{ formatElapsed(move.timestamp) }}</span>
       <Badge :variant="move.player === 'player' ? 'default' : 'accent'" size="sm">
         {{ move.player === 'player' ? 'You' : 'AI' }}
       </Badge>
@@ -41,8 +41,11 @@ function formatCoord(coord: { row: number; col: number }): string {
   return `${COL_LABELS[coord.col]}${ROW_LABELS[coord.row]}`
 }
 
-function formatTime(timestamp: number): string {
-  const date = new Date(timestamp)
-  return date.toLocaleTimeString([], { minute: '2-digit', second: '2-digit' })
+function formatElapsed(timestamp: number): string {
+  const firstMove = props.moves[0]?.timestamp ?? timestamp
+  const elapsed = Math.max(0, Math.floor((timestamp - firstMove) / 1000))
+  const mins = Math.floor(elapsed / 60)
+  const secs = elapsed % 60
+  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 </script>
