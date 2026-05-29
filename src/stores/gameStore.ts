@@ -11,6 +11,7 @@ import type {
   ShipType,
   GameMove,
   Coordinates,
+  ShipSunkNotification,
 } from '@/game/types'
 import { BOARD_SIZE, CELL_STATE, SHIP_TYPES } from '@/constants/game'
 import {
@@ -44,6 +45,10 @@ export const useGameStore = defineStore('game', () => {
 
   // Move history
   const moveHistory = ref<GameMove[]>([])
+
+  // Ship-sunk notifications (transient toasts)
+  const shipSunkNotifications = ref<ShipSunkNotification[]>([])
+  let notificationId = 0
 
   // Ship placement
   const placedShips = ref<Record<string, boolean>>({})
@@ -164,8 +169,17 @@ export const useGameStore = defineStore('game', () => {
     opponentShips.value = aiShips
     currentTurn.value = 'player'
     moveHistory.value = []
+    shipSunkNotifications.value = []
     message.value = ''
     resetAI()
+  }
+
+  function notifyShipSunk(by: 'player' | 'opponent', shipType: string) {
+    shipSunkNotifications.value.push({ id: notificationId++, by, shipType })
+  }
+
+  function dismissShipSunkNotification(id: number) {
+    shipSunkNotifications.value = shipSunkNotifications.value.filter(n => n.id !== id)
   }
 
   async function playerAttack(coordinates: Coordinates): Promise<void> {
@@ -197,6 +211,10 @@ export const useGameStore = defineStore('game', () => {
       message.value = result.sunk ? `You sunk their ${result.shipType}! 🔥` : 'Direct hit! 💥'
     } else {
       message.value = 'Miss! 🌊'
+    }
+
+    if (result.sunk && result.shipType) {
+      notifyShipSunk('player', result.shipType)
     }
 
     if (areAllShipsSunk(opponentShips.value)) {
@@ -240,6 +258,10 @@ export const useGameStore = defineStore('game', () => {
       message.value = 'AI missed! 😌'
     }
 
+    if (result.sunk && result.shipType) {
+      notifyShipSunk('opponent', result.shipType)
+    }
+
     if (areAllShipsSunk(playerShips.value)) {
       gamePhase.value = 'gameOver'
       message.value = '💀 Defeat! Your fleet has been destroyed!'
@@ -274,6 +296,7 @@ export const useGameStore = defineStore('game', () => {
     playerShips.value = []
     opponentShips.value = []
     moveHistory.value = []
+    shipSunkNotifications.value = []
     placedShips.value = {}
     placementOrientation.value = 'horizontal'
     currentTurn.value = 'player'
@@ -297,6 +320,7 @@ export const useGameStore = defineStore('game', () => {
     placedShips,
     placementOrientation,
     currentTurn,
+    shipSunkNotifications,
     // Computed
     turnCount,
     playerShipsRemaining,
@@ -317,5 +341,6 @@ export const useGameStore = defineStore('game', () => {
     startBattle,
     playerAttack,
     resetGame,
+    dismissShipSunkNotification,
   }
 })
