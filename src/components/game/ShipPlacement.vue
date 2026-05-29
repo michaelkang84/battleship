@@ -68,7 +68,7 @@
 
     <!-- Board -->
     <div class="flex-1">
-      <div class="mb-3 flex items-center gap-3">
+      <div class="mb-3 flex items-center justify-between gap-3">
         <div class="text-xs text-muted-foreground">
           <span v-if="selectedShip" class="text-primary">
             Placing: {{ SHIP_TYPES[selectedShip].name }}
@@ -76,11 +76,29 @@
           </span>
           <span v-else class="italic"> Select a ship to place </span>
         </div>
+
+        <button
+          type="button"
+          class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          @click="showCoordinates = !showCoordinates"
+        >
+          <span
+            class="relative inline-flex h-4 w-7 items-center rounded-full transition-colors"
+            :class="showCoordinates ? 'bg-primary' : 'bg-muted-foreground/30'"
+          >
+            <span
+              class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform"
+              :class="showCoordinates ? 'translate-x-3.5' : 'translate-x-0.5'"
+            />
+          </span>
+          Coordinates
+        </button>
       </div>
 
       <GameBoard
         :board="board"
         :show-ships="true"
+        :show-coordinates="showCoordinates"
         :is-clickable="!!selectedShip"
         :highlight-cells="previewCells"
         variant="player"
@@ -117,6 +135,7 @@ const emit = defineEmits<{
 
 const selectedShip = ref<ShipType | null>(null)
 const previewCells = ref<{ row: number; col: number; valid: boolean }[]>([])
+const showCoordinates = ref(true)
 
 const totalShips = computed(() => Object.keys(SHIP_TYPES).length)
 const placedCount = computed(() => Object.keys(props.placedShips).length)
