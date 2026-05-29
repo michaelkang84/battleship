@@ -82,7 +82,7 @@
             </div>
             <div class="flex items-start gap-2">
               <Badge>Status Panel</Badge>
-              <span>Toggle between default, detailed, and minimized views</span>
+              <span>Switch between default and minimized views, or open detailed stats in a popup</span>
             </div>
           </div>
         </Card>

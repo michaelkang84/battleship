@@ -48,7 +48,7 @@
         <div class="flex gap-1">
           <button
             class="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            @click="$emit('changeMode', 'detailed')"
+            @click="showDetails = true"
           >
             Details
           </button>
@@ -82,78 +82,44 @@
         <p class="text-sm font-medium text-foreground">{{ message }}</p>
       </div>
     </div>
+  </Transition>
 
-    <!-- Detailed view -->
-    <div
-      v-else
-      key="detailed"
-      class="rounded-xl border border-border/30 bg-card/80 p-4 backdrop-blur-sm"
-    >
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div
-            class="h-3 w-3 rounded-full transition-colors"
-            :class="isPlayerTurn ? 'bg-primary animate-pulse' : 'bg-muted-foreground/30'"
-          />
-          <span class="text-sm font-semibold">
-            {{ isPlayerTurn ? 'Your Turn' : "AI's Turn" }}
-          </span>
-          <Badge variant="outline" size="sm">Turn {{ turnCount }}</Badge>
-        </div>
-
-        <div class="flex gap-1">
-          <button
-            class="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            @click="$emit('changeMode', 'default')"
-          >
-            Collapse
-          </button>
-          <button
-            class="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            @click="$emit('changeMode', 'minimized')"
-          >
-            Minimize
-          </button>
-        </div>
-      </div>
-
-      <div class="mt-3 grid grid-cols-2 gap-4">
-        <!-- Player Fleet Status -->
-        <div>
-          <h4 class="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Your Fleet
-          </h4>
-          <ShipFleet :ships="playerShips" variant="player" />
-        </div>
-
-        <!-- Opponent Fleet Status -->
-        <div>
-          <h4 class="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Enemy Fleet
-          </h4>
-          <ShipFleet :ships="opponentShips" variant="opponent" />
-        </div>
-      </div>
-
-      <!-- Move History -->
-      <div v-if="moveHistory.length > 0" class="mt-4">
+  <!-- Details dialog -->
+  <Modal v-model="showDetails" title="Battle Details" size="lg">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <!-- Player Fleet Status -->
+      <div>
         <h4 class="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-          Battle Log
+          Your Fleet
         </h4>
-        <MoveHistory :moves="moveHistory" />
+        <ShipFleet :ships="playerShips" variant="player" />
       </div>
 
-      <div v-if="message" class="mt-3 rounded-lg bg-primary/5 px-3 py-2">
-        <p class="text-sm font-medium text-foreground">{{ message }}</p>
+      <!-- Opponent Fleet Status -->
+      <div>
+        <h4 class="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          Enemy Fleet
+        </h4>
+        <ShipFleet :ships="opponentShips" variant="opponent" />
       </div>
     </div>
-  </Transition>
+
+    <!-- Move History -->
+    <div v-if="moveHistory.length > 0" class="mt-4">
+      <h4 class="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        Battle Log
+      </h4>
+      <MoveHistory :moves="moveHistory" />
+    </div>
+  </Modal>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { Ship, GameMove, StatusMode } from '@/game/types'
 import { SHIP_TYPES } from '@/constants/game'
 import Badge from '@/components/ui/Badge.vue'
+import Modal from '@/components/ui/Modal.vue'
 import ShipFleet from './ShipFleet.vue'
 import MoveHistory from './MoveHistory.vue'
 
@@ -172,6 +138,8 @@ const props = defineProps<Props>()
 defineEmits<{
   changeMode: [mode: StatusMode]
 }>()
+
+const showDetails = ref(false)
 
 const totalShips = Object.keys(SHIP_TYPES).length
 
